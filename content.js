@@ -10,7 +10,60 @@ let redMultiplier = 1, greenMultiplier = 1, blueMultiplier = 1;
 let redInput = 1;
 let greenInput = 1;
 let blueInput = 1;
+let blueMagicValue = 1.2;
+let thresholdRatio = 2000;
+let imageDataCopy;
 
+document.addEventListener("DOMContentLoaded", function() {
+    const thresholdRatioSlider = document.getElementById("thresholdRatio");
+    const thresholdRatioValue = document.getElementById("thresholdRatioValue");
+    const blueMagicValueSlider = document.getElementById("blueMagicValue");
+    const blueMagicValueValue = document.getElementById("blueMagicValueValue");
+
+    // For RGB sliders
+    const redSlider = document.getElementById("redInput");
+    const redValue = document.getElementById("redValue");
+    const greenSlider = document.getElementById("greenInput");
+    const greenValue = document.getElementById("greenValue");
+    const blueSlider = document.getElementById("blueInput");
+    const blueValue = document.getElementById("blueValue");
+
+    // Initialize the text content
+    thresholdRatioValue.textContent = thresholdRatioSlider.value;
+    blueMagicValueValue.textContent = blueMagicValueSlider.value;
+
+    // Initialize the text content for RGB sliders
+    redValue.textContent = redSlider.value;
+    greenValue.textContent = greenSlider.value;
+    blueValue.textContent = blueSlider.value;
+
+    // Update the text content when the thresholdRatio and blueMagicValue slider values change
+    thresholdRatioSlider.addEventListener("input", function() {
+        thresholdRatioValue.textContent = this.value;
+        applySettings();
+    });
+
+    blueMagicValueSlider.addEventListener("input", function() {
+        blueMagicValueValue.textContent = this.value;
+        applySettings();
+    });
+
+    // Update the text content when the RGB slider values change
+    redSlider.addEventListener("input", function() {
+        redValue.textContent = this.value;
+        applySettings();
+    });
+
+    greenSlider.addEventListener("input", function() {
+        greenValue.textContent = this.value;
+        applySettings();
+    });
+
+    blueSlider.addEventListener("input", function() {
+        blueValue.textContent = this.value;
+        applySettings();
+    });
+});
 
 //---------IMAGE FILTER LOGIC----------//
 // This will work because adjstRed is defined in this scope
@@ -30,6 +83,8 @@ let useAutoColor = false;  // Flag to determine if auto color correction should 
 
 // Function to be called when the checkbox is clicked
 function onCheckboxClick() {
+blueMagicValue = 1.2;
+thresholdRatio = 2000;
   useAutoColor = !useAutoColor;  // Toggle the flag
           // Currently showing the original, switch to the filtered
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -38,6 +93,7 @@ function onCheckboxClick() {
           applyColorMatrixToPixels(pixels, colorFilterMatrix);
           ctx.putImageData(imageData, 0, 0);
 }
+
 
 
 function getKey(settings) {
@@ -49,6 +105,8 @@ let lastManualMatrix = null;
 let matrixCache = {};
 
 function getOptimizedColorFilterMatrix(pixels, width, height, depth) {
+    const blueMagicValue = parseFloat(document.getElementById("blueMagicValue").value);
+    const thresholdRatio = parseFloat(document.getElementById("thresholdRatio").value);
     let currentSettings;
     if (useAutoColor) {
         currentSettings = `auto-${depth}`;
@@ -67,7 +125,7 @@ function getOptimizedColorFilterMatrix(pixels, width, height, depth) {
 
     let newMatrix;
     if (useAutoColor) {
-        newMatrix = getColorFilterMatrix(pixels, width, height, depth);
+        newMatrix = getColorFilterMatrix(pixels, width, height, depth, blueMagicValue, thresholdRatio);
     } else {
         newMatrix = getManualMatrix(redMultiplier, greenMultiplier, blueMultiplier, hue);
     }
@@ -104,10 +162,9 @@ function getManualMatrix(redMultiplier, greenMultiplier, blueMultiplier, hue) {
 
 function getColorFilterMatrix(pixels, width, height, depth) {
     const numOfPixels = width * height;
-    const thresholdRatio = 2000;
     const thresholdLevel = numOfPixels / thresholdRatio;
-    const blueMagicValue = 1.2;
-  
+
+
     let hist = { 
         r: new Uint32Array(MAX_COLOR_VALUE + 1),
         g: new Uint32Array(MAX_COLOR_VALUE + 1),
@@ -417,27 +474,6 @@ function onNewVideo() {
 
 let showOriginal = false;  // A flag to determine whether to show the original image
 
-// Function to toggle the display between the original and the filtered images
-function toggleOriginalImage() {
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-
-    if (showOriginal) {
-        // Currently showing the original, switch to the filtered
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const pixels = imageData.data;
-        const colorFilterMatrix = getOptimizedColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
-        applyColorMatrixToPixels(pixels, colorFilterMatrix);
-        ctx.putImageData(imageData, 0, 0);
-    } else {
-        // Currently showing the filtered, switch to the original
-        ctx.putImageData(originalImageData, 0, 0);
-    }
-
-    // Toggle the flag for the next click
-    showOriginal = !showOriginal;
-}
-
 // Initialize global variables
 let canvasElement;
 let ctx;
@@ -461,13 +497,17 @@ function renderFrame() {
         return;
     }
     
+    // Update thresholdRatio and blueMagicValue dynamically
+    thresholdRatio = parseFloat(document.getElementById("thresholdRatio").value);
+    blueMagicValue = parseFloat(document.getElementById("blueMagicValue").value);
+    
     ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
     
     if (!showOriginal) {
         // Apply your filter here
         let imageData = ctx.getImageData(0, 0, canvasElement.width, canvasElement.height);
         const pixels = new Uint8ClampedArray(imageData.data.buffer);  // Typed array
-        const colorFilterMatrix = getSmoothColorFilterMatrix(pixels, canvasElement.width, canvasElement.height, depth);
+        const colorFilterMatrix = getOptimizedColorFilterMatrix(pixels, canvasElement.width, canvasElement.height, depth);
 
         applyColorMatrixToPixels(pixels, colorFilterMatrix);
         
@@ -476,6 +516,7 @@ function renderFrame() {
 
     animationFrameId = requestAnimationFrame(renderFrame);
 }
+
 
 
 // Inside your DOMContentLoaded function
@@ -549,14 +590,17 @@ document.addEventListener("DOMContentLoaded", function() {
     // Event listeners for RGB input
     document.getElementById('redInput').addEventListener('input', function() {
         redMultiplier = this.value / 255;
+        applySettings();
     });
     
     document.getElementById('greenInput').addEventListener('input', function() {
         greenMultiplier = this.value / 255;
+        applySettings();
     });
     
     document.getElementById('blueInput').addEventListener('input', function() {
         blueMultiplier = this.value / 255;
+        applySettings();
     });
     document.getElementById("resetBtn").addEventListener("click", function() {
         // Reset all your variables and settings to default
@@ -585,10 +629,6 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('depthInput').addEventListener('input', function() {
     depth = this.value;
 });
-
-document.getElementById('hueInput').addEventListener('input', function() {
-    hue = this.value;
-  });  
   
 document.getElementById('brightnessInput').addEventListener('input', function() {
     brightness = this.value;
@@ -634,8 +674,17 @@ fileInput.addEventListener('change', function() {
 
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                // Save original image data
-                originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                // Store the original image data if not already stored
+                if (originalImageData === null) {
+                    originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                }
+
+                // Create a copy of the original image data to work with
+                imageDataCopy = new ImageData(
+                    new Uint8ClampedArray(originalImageData.data),
+                    originalImageData.width,
+                    originalImageData.height
+                );
 
                 // Now apply the filter
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -697,6 +746,44 @@ function applyColorMatrixToPixels(pixels, colorFilterMatrix) {
     }
 }
 
+function applySettings() {
+    thresholdRatio = parseFloat(document.getElementById("thresholdRatio").value);
+    blueMagicValue = parseFloat(document.getElementById("blueMagicValue").value);
+    depth = parseFloat(document.getElementById("depthInput").value); // Assuming you have a depth input
+    
+    greenMultiplier = parseFloat(document.getElementById("greenInput").value) / 255;
+    redMultiplier = parseFloat(document.getElementById("redInput").value) / 255;
+    blueMultiplier = parseFloat(document.getElementById("blueInput").value) / 255;
 
-  
+    // Get the canvas and context
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    // Store the original image data if not already stored
+    if (originalImageData === null) {
+        originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+
+    // Create a copy of the original image data to work with
+    const imageData = new ImageData(
+        new Uint8ClampedArray(originalImageData.data),
+        originalImageData.width,
+        originalImageData.height
+    );
+
+    const pixels = imageData.data;
+
+    // Apply the color correction
+    const colorFilterMatrix = getColorFilterMatrix(pixels, canvas.width, canvas.height, depth, thresholdRatio, blueMagicValue);
+    applyColorMatrixToPixels(pixels, colorFilterMatrix);
+
+    // Put the modified image data back on the canvas
+    ctx.putImageData(imageData, 0, 0);
+
+    console.log("Applied Settings:", {
+        thresholdRatio,
+        blueMagicValue
+    });
+}
+
 const video = document.getElementById('video');
