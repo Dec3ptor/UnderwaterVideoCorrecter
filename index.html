@@ -21,39 +21,45 @@
 <button id="resetFilter">Reset Filter</button>
 
 <!-- Adding preset buttons -->
-<button id="preset1">Preset 1</button>
-<button id="preset2">Preset 2</button>
-<button id="applyCustomMatrix">Apply Custom Color Matrix</button>
+<!-- <button id="Sample1">Sample 1</button>
+<button id="Sample2">Sample 2</button>
+<button id="Sample3">Sample 3</button>
+<button id="Sample4">Sample 4</button>
+<button id="Sample5">Sample 5</button>
+<button id="Sample6">Sample 6</button> -->
+<!-- <button id="applyCustomMatrix">Apply Custom Color Matrix</button> -->
+<button id="downloadBtn">Download Screencap</button>
+
+<button id="rewindMoreBtn">Rewind 15s</button>
+<button id="rewindBtn">Rewind 5s</button>
 <button id="playPauseBtn">Pause</button>
-<button id="muteBtn">Mute</button>
 <button id="skipBtn">Skip 5s</button>
+<button id="skipMoreBtn">Skip 15s</button>
+<button id="muteBtn">Mute</button>
+
+<br>
 <h3>Settings</h3>
   <input type="checkbox" id="Checkbox" onclick="onCheckboxClick()"> Use Auto Color Correction
 
 <label for="depth">Depth (meters): </label>
 <input type="number" id="depthInput" value="20" min="0" max="100">
 <br>
+<button id="resetBtn">Reset Filters</button>
+
 <label for="hue">Hue: </label>
 <input type="range" id="hueInput" min="0" max="360" value="0">
-<br>
-<label for="whiteBalance">White Balance: </label>
-<input type="range" id="whiteBalanceInput" min="2000" max="10000" value="6500">
-<br>
 
-<label for="contrast">Contrast: </label>
-<input type="range" id="contrastInput" min="0" max="200" value="100">
-<br>
+<!-- RGB Inputs -->
+<label>Red: </label><input type="range" id="redInput" min="0" max="255" value="1"><br>
+<label>Green: </label><input type="range" id="greenInput" min="0" max="255" value="1"><br>
+<label>Blue: </label><input type="range" id="blueInput" min="0" max="255" value="1"><br>
 
-<label for="saturation">Saturation: </label>
-<input type="range" id="saturationInput" min="0" max="100" value="100">
-<br>
 
 <label for="brightness">Brightness: </label>
 <input type="range" id="brightnessInput" min="0" max="200" value="100">
 <br>
-
   
-<script src="script.js"></script>
+<script src="content.js"></script>
 
 </body>
 </html>

@@ -5,9 +5,19 @@ let brightness = 100;  // Default value
 let whiteBalance = 6500;  // Initialize to a neutral value
 let contrast = 100;  // Initialize to a neutral value (percentage)
 let saturation = 100;  // Initialize to a neutral value (percentage)
+let adjstRed = 10;
+let redMultiplier = 1, greenMultiplier = 1, blueMultiplier = 1;
+let redInput = 1;
+let greenInput = 1;
+let blueInput = 1;
 
 
 //---------IMAGE FILTER LOGIC----------//
+// This will work because adjstRed is defined in this scope
+function anotherFunction() {
+    let adjstRed = 20;
+    console.log(adjstRed);  
+}
 
 let lastHue = null;
 let lastMatrix = null;
@@ -21,6 +31,12 @@ let useAutoColor = false;  // Flag to determine if auto color correction should 
 // Function to be called when the checkbox is clicked
 function onCheckboxClick() {
   useAutoColor = !useAutoColor;  // Toggle the flag
+          // Currently showing the original, switch to the filtered
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const pixels = imageData.data;
+          const colorFilterMatrix = getOptimizedColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
+          applyColorMatrixToPixels(pixels, colorFilterMatrix);
+          ctx.putImageData(imageData, 0, 0);
 }
 
 
@@ -37,9 +53,10 @@ function getOptimizedColorFilterMatrix(pixels, width, height, depth) {
     if (useAutoColor) {
         currentSettings = `auto-${depth}`;
     } else {
-        currentSettings = `${hue}-${contrast}-${brightness}-${whiteBalance}-${saturation}`;
+        currentSettings = `${redMultiplier}-${greenMultiplier}-${blueMultiplier}-${hue}`;
     }
 
+    // Check for cached matrix
     if (currentSettings === lastSettings && lastManualMatrix) {
         return lastManualMatrix;
     }
@@ -52,7 +69,7 @@ function getOptimizedColorFilterMatrix(pixels, width, height, depth) {
     if (useAutoColor) {
         newMatrix = getColorFilterMatrix(pixels, width, height, depth);
     } else {
-        newMatrix = getManualMatrix(pixels);  // Pass the pixels for manual adjustment
+        newMatrix = getManualMatrix(redMultiplier, greenMultiplier, blueMultiplier, hue);
     }
 
     lastSettings = currentSettings;
@@ -62,7 +79,8 @@ function getOptimizedColorFilterMatrix(pixels, width, height, depth) {
     return newMatrix;
 }
 
-function getManualMatrix() {
+function getManualMatrix(redMultiplier, greenMultiplier, blueMultiplier, hue) {
+    
     // Initialize a 5x4 color matrix to the identity matrix
     const matrix = [
         1, 0, 0, 0, 0,
@@ -71,25 +89,18 @@ function getManualMatrix() {
         0, 0, 0, 1, 0
     ];
 
-    // Adjust the scaling for contrast
-    const contrastFactor = 1 + (contrast - 100) * 0.01;
-    matrix[0] = contrastFactor;
-    matrix[5] = contrastFactor;
-    matrix[10] = contrastFactor;
+    // New code for red, green, and blue multipliers
+    matrix[0] *= redMultiplier;
+    matrix[5] *= greenMultiplier;
+    matrix[10] *= blueMultiplier;
 
-    // Adjust the scaling for brightness
-    matrix[4] = (brightness - 100) * 0.01;
-    matrix[9] = (brightness - 100) * 0.01;
-    matrix[14] = (brightness - 100) * 0.01;
-
-    // Adjust the scaling for white balance
-    const whiteBalanceFactor = (whiteBalance - 6500) / 13000;  // Adjusted scale
-    matrix[0] += whiteBalanceFactor;
-    matrix[5] += whiteBalanceFactor;
-    matrix[10] += whiteBalanceFactor;
+    // New code for hue adjustment (simplified)
+    matrix[1] = matrix[5] * Math.sin(hue);
+    matrix[2] = matrix[10] * Math.sin(hue);
 
     return matrix;
 }
+
 
 function getColorFilterMatrix(pixels, width, height, depth) {
     const numOfPixels = width * height;
@@ -167,24 +178,32 @@ function getColorFilterMatrix(pixels, width, height, depth) {
     adjust.b = normalizingInterval(normalize.b);
 
     const shifted = hueShiftRed(1, 1, 1, hueShift);
-    const redGain = 256 / (adjust.r.high - adjust.r.low);
-    const greenGain = 256 / (adjust.g.high - adjust.g.low);
-    const blueGain = 256 / (adjust.b.high - adjust.b.low);
+    let redGain = 256 / (adjust.r.high - adjust.r.low);
+    let greenGain = 256 / (adjust.g.high - adjust.g.low);
+    let blueGain = 256 / (adjust.b.high - adjust.b.low);
     const redOffset = (-adjust.r.low / 256) * redGain;
     const greenOffset = (-adjust.g.low / 256) * greenGain;
     const blueOffset = (-adjust.b.low / 256) * blueGain;
-    const adjstRed = shifted.r * redGain;
-    const adjstRedGreen = shifted.g * redGain;
-    const adjstRedBlue = shifted.b * redGain * blueMagicValue;
+    let adjstRed = shifted.r * redGain;
+    let adjstRedGreen = shifted.g * redGain;
+    let adjstRedBlue = shifted.b * redGain * blueMagicValue;
+
+    let newAdjstRed = adjstRed * redMultiplier;
+    let newGreenGain = greenGain * greenMultiplier;
+    let newBlueGain = blueGain * blueMultiplier;
+
+    // Add these lines before returning the matrix to apply RGB multipliers
+    adjstRed *= redMultiplier;
+    greenGain *= greenMultiplier;
+    blueGain *= blueMultiplier;
 
     return [
-        adjstRed, adjstRedGreen, adjstRedBlue, 0, redOffset,
-        0, greenGain, 0, 0, greenOffset,
-        0, 0, blueGain, 0, blueOffset,
+        newAdjstRed, adjstRedGreen, adjstRedBlue, 0, redOffset,
+        0, newGreenGain, 0, 0, greenOffset,
+        0, 0, newBlueGain, 0, blueOffset,
         0, 0, 0, 1, 0,
-    ];
+    ];    
 }
-
 
 
 // Contrast adjustment [0, 200]
@@ -265,21 +284,21 @@ function processPixel(pixels, index, hueShift, hist) {
     let shifted = hueShiftRed(red, green, blue, hueShift);
     red = shifted.r + shifted.g + shifted.b;
     
-    // Contrast adjustment
-    red = adjustContrast(red, contrast);
-    green = adjustContrast(green, contrast);
-    blue = adjustContrast(blue, contrast);
+    // // Contrast adjustment
+    // red = adjustContrast(red, contrast);
+    // green = adjustContrast(green, contrast);
+    // blue = adjustContrast(blue, contrast);
 
-    // White balance adjustment
-    red = adjustWhiteBalance(red, whiteBalance);
-    green = adjustWhiteBalance(green, whiteBalance);
-    blue = adjustWhiteBalance(blue, whiteBalance);
+    // // White balance adjustment
+    // red = adjustWhiteBalance(red, whiteBalance);
+    // green = adjustWhiteBalance(green, whiteBalance);
+    // blue = adjustWhiteBalance(blue, whiteBalance);
 
-    // Saturation adjustment
-    shifted = adjustSaturation(red, green, blue, saturation);
-    red = shifted.r;
-    green = shifted.g;
-    blue = shifted.b;
+    // // Saturation adjustment
+    // shifted = adjustSaturation(red, green, blue, saturation);
+    // red = shifted.r;
+    // green = shifted.g;
+    // blue = shifted.b;
 
     // Rounding and clamping the values
     red = Math.min(MAX_COLOR_VALUE, Math.max(0, Math.round(red)));
@@ -396,95 +415,6 @@ function onNewVideo() {
 
 //------------------------------------------//
 
-
-// Preset filter for underwater images
-const underwaterPreset = function(pixels) {
-    for (let i = 0; i < pixels.length; i += 4) {
-        pixels[i] = Math.min(255, pixels[i] * 1.3);  // Increase red
-        pixels[i + 1] = Math.min(255, pixels[i + 1] * 1.1);  // Slightly increase green
-        pixels[i + 2] = Math.min(255, pixels[i + 2] * 0.9);  // Reduce blue
-    }
-};
-
-// Custom filter matrix
-const customColorMatrix = [
-    1.0851598274658527, 1.3146878916794824, -0.8160717942018385, 0, 0, 
-    0, 1.2367149758454106, 0, 0, -0.23188405797101447, 
-    0, 0, 1.4463276836158192, 0, -0.4406779661016949, 
-    0, 0, 0, 1, 0
-];
-
-// Function to apply the custom filter matrix
-function applyCustomColorMatrix() {
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-    for (let i = 0; i < pixels.length; i += 4) {
-        const red = pixels[i];
-        const green = pixels[i + 1];
-        const blue = pixels[i + 2];
-        const alpha = pixels[i + 3];
-        
-        // Apply the color matrix filter
-        pixels[i] = red * customColorMatrix[0] + green * customColorMatrix[1] + blue * customColorMatrix[2] + alpha * customColorMatrix[3] + customColorMatrix[4];
-        pixels[i + 1] = red * customColorMatrix[5] + green * customColorMatrix[6] + blue * customColorMatrix[7] + alpha * customColorMatrix[8] + customColorMatrix[9];
-        pixels[i + 2] = red * customColorMatrix[10] + green * customColorMatrix[11] + blue * customColorMatrix[12] + alpha * customColorMatrix[13] + customColorMatrix[14];
-        pixels[i + 3] = red * customColorMatrix[15] + green * customColorMatrix[16] + blue * customColorMatrix[17] + alpha * customColorMatrix[18] + customColorMatrix[19];
-    }
-    ctx.putImageData(imageData, 0, 0);
-}
-
-let expanded = false;
-
-// Existing presets
-const presets = {
-    preset1: [1.2, 1, 1],
-    preset2: [1, 1.2, 1],
-    underwater: underwaterPreset
-};
-
-
-function applyPreset(preset) {
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-
-    for (let i = 0; i < pixels.length; i += 4) {
-        pixels[i] = Math.min(255, pixels[i] * preset[0]);   // Red
-        pixels[i + 1] = Math.min(255, pixels[i + 1] * preset[1]); // Green
-        pixels[i + 2] = Math.min(255, pixels[i + 2] * preset[2]); // Blue
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-}
-
-function expandCanvas() {
-    const canvas = document.getElementById('canvas');
-    if (expanded) {
-        canvas.style.maxWidth = "100%";
-        expanded = false;
-    } else {
-        canvas.style.maxWidth = "none";
-        expanded = true;
-    }
-}
-
-let referencePixels = {
-    before: null,
-    after: null
-};
-
-function selectReferencePixel(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext('2d');
-    const x = canvas.width / 2;
-    const y = canvas.height / 2;
-    const pixel = ctx.getImageData(x, y, 1, 1).data;
-    referencePixels[canvasId === 'canvas' ? 'after' : 'before'] = pixel;
-}
-
 let showOriginal = false;  // A flag to determine whether to show the original image
 
 // Function to toggle the display between the original and the filtered images
@@ -550,37 +480,33 @@ function renderFrame() {
 
 // Inside your DOMContentLoaded function
 document.addEventListener("DOMContentLoaded", function() {
+
+    
     canvasElement = document.getElementById('canvas');
     ctx = canvasElement.getContext('2d');
     videoElement = document.getElementById('video'); 
     const fileInput = document.getElementById('fileInput');
+    const rewindBtn = document.getElementById('rewindBtn');
+    const rewindMoreBtn = document.getElementById('rewindMoreBtn');
     const playPauseBtn = document.getElementById('playPauseBtn');
     const muteBtn = document.getElementById('muteBtn');
     const skipBtn = document.getElementById('skipBtn');
+    const skipMoreBtn = document.getElementById('skipMoreBtn');
 
-  // Inside your DOMContentLoaded function, add these lines
-document.getElementById('depthInput').addEventListener('input', function() {
-    depth = this.value;
-});
+    
 
-document.getElementById('hueInput').addEventListener('input', function() {
-        hue = this.value;
-});
-  
-document.getElementById('brightnessInput').addEventListener('input', function() {
-    brightness = this.value;
-});
-document.getElementById('whiteBalanceInput').addEventListener('input', function() {
-    whiteBalance = this.value;
-});
 
-document.getElementById('contrastInput').addEventListener('input', function() {
-    contrast = this.value;
-});
+// document.getElementById('whiteBalanceInput').addEventListener('input', function() {
+//     whiteBalance = this.value;
+// });
 
-document.getElementById('saturationInput').addEventListener('input', function() {
-    saturation = this.value;
-});
+// document.getElementById('contrastInput').addEventListener('input', function() {
+//     contrast = this.value;
+// });
+
+// document.getElementById('saturationInput').addEventListener('input', function() {
+//     saturation = this.value;
+// });
 
   
     playPauseBtn.addEventListener('click', function() {
@@ -610,6 +536,63 @@ document.getElementById('saturationInput').addEventListener('input', function() 
     skipBtn.addEventListener('click', function() {
         videoElement.currentTime += 5;  // Skip 5 seconds forward
     });
+    skipMoreBtn.addEventListener('click', function() {
+        videoElement.currentTime += 15;  // Skip 5 seconds forward
+    });
+
+    rewindBtn.addEventListener('click', function() {
+        videoElement.currentTime -= 5;  // Skip 5 seconds backward
+    });
+    rewindMoreBtn.addEventListener('click', function() {
+        videoElement.currentTime -= 15;  // Skip 15 seconds backward
+    });
+    // Event listeners for RGB input
+    document.getElementById('redInput').addEventListener('input', function() {
+        redMultiplier = this.value / 255;
+    });
+    
+    document.getElementById('greenInput').addEventListener('input', function() {
+        greenMultiplier = this.value / 255;
+    });
+    
+    document.getElementById('blueInput').addEventListener('input', function() {
+        blueMultiplier = this.value / 255;
+    });
+    document.getElementById("resetBtn").addEventListener("click", function() {
+        // Reset all your variables and settings to default
+        redMultiplier = 1;
+        greenMultiplier = 1;
+        blueMultiplier = 1;
+    
+        // Currently showing the original, switch to the filtered
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        const colorFilterMatrix = getColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
+        applyColorMatrixToPixels(pixels, colorFilterMatrix);
+        ctx.putImageData(imageData, 0, 0);
+      });
+    
+    document.getElementById("downloadBtn").addEventListener("click", function() {
+        const canvas = document.getElementById('canvas');
+        const imgData = canvas.toDataURL("image/png");
+        const a = document.createElement('a');
+        a.href = imgData;
+        a.download = 'filtered_image.png';
+        a.click();
+      });
+    
+  // Inside your DOMContentLoaded function, add these lines
+  document.getElementById('depthInput').addEventListener('input', function() {
+    depth = this.value;
+});
+
+document.getElementById('hueInput').addEventListener('input', function() {
+    hue = this.value;
+  });  
+  
+document.getElementById('brightnessInput').addEventListener('input', function() {
+    brightness = this.value;
+});
 
 fileInput.addEventListener('change', function() {
     // Reset global variables
@@ -707,27 +690,13 @@ function applyColorMatrixToPixels(pixels, colorFilterMatrix) {
         const newG = Math.min(255, Math.max(0, g * colorFilterMatrix[6] + colorFilterMatrix[9] * 255));
         const newB = Math.min(255, Math.max(0, b * colorFilterMatrix[12] + colorFilterMatrix[14] * 255));
 
-        // Update the pixel array in-place
-        pixels[i] = newR;
-        pixels[i + 1] = newG;
-        pixels[i + 2] = newB;
+        // Update pixel array in-place with RGB multipliers
+        pixels[i] = newR * redMultiplier;
+        pixels[i + 1] = newG * greenMultiplier;
+        pixels[i + 2] = newB * blueMultiplier;
     }
 }
 
 
-function applyFilterToCanvas(canvasId, filter) {
-    const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const pixels = imageData.data;
-
-    for (let i = 0; i < pixels.length; i += 4) {
-        pixels[i] = Math.min(255, pixels[i] * filter.red);
-        pixels[i + 1] = Math.min(255, pixels[i + 1] * filter.green);
-        pixels[i + 2] = Math.min(255, pixels[i + 2] * filter.blue);
-    }
-
-    ctx.putImageData(imageData, 0, 0);
-}
-
+  
 const video = document.getElementById('video');
