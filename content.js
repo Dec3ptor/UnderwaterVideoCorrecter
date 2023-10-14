@@ -13,6 +13,7 @@ let blueInput = 1;
 let blueMagicValue = 1.2;
 let thresholdRatio = 2000;
 let imageDataCopy;
+let currentMediaType = 'none'; // This can be 'image', 'video', or 'none'
 
 document.addEventListener("DOMContentLoaded", function() {
     const thresholdRatioSlider = document.getElementById("thresholdRatio");
@@ -513,8 +514,10 @@ function renderFrame() {
         
         ctx.putImageData(imageData, 0, 0);
     }
-
-    animationFrameId = requestAnimationFrame(renderFrame);
+    // Request the next animation frame if the video is playing
+    if (isPlaying) {
+        animationFrameId = requestAnimationFrame(renderFrame);
+    }
 }
 
 
@@ -524,7 +527,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     
     canvasElement = document.getElementById('canvas');
-    ctx = canvasElement.getContext('2d');
+    ctx = canvasElement.getContext('2d', { willReadFrequently: true });
     videoElement = document.getElementById('video'); 
     const fileInput = document.getElementById('fileInput');
     const rewindBtn = document.getElementById('rewindBtn');
@@ -535,6 +538,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const skipMoreBtn = document.getElementById('skipMoreBtn');
 
     
+    document.getElementById('loadImageFromUrl').addEventListener('click', async function() {
+        const imageUrl = document.getElementById('imageUrl').value;
+        if (imageUrl) {
+            try {
+                const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(imageUrl);
+                const response = await fetch(proxyUrl);
+                const imageBlob = await response.blob();
+                processImageFile(imageBlob, imageBlob.type);
+            } catch (error) {
+                console.error("Error fetching the image:", error);
+            }
+        }
+    });
 
 
 // document.getElementById('whiteBalanceInput').addEventListener('input', function() {
@@ -635,97 +651,117 @@ document.getElementById('brightnessInput').addEventListener('input', function() 
 });
 
 fileInput.addEventListener('change', function() {
+    // ... [Your existing logic for resetting variables and clearing canvas]
     // Reset global variables
     smoothedMatrix = null;  // Reset smoothed color matrix
     alpha = 0.9;  // Reset alpha for smoothing
     originalImageData = null;  // Reset original image data
     isShowingOriginal = false;  // Reset flag for showing original content
     showOriginal = false; // Reset the flag for toggling original image
-    
-    // Stop ongoing animations for video
-    if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+
+    const file = fileInput.files[0];
+    if (file.type.startsWith('video')) {
+        // ... [Your existing logic for video processing]
+        canvas.style.display = 'block'; // or 'inline' or any other suitable value
+        videoElement.src = URL.createObjectURL(file);
+        videoElement.addEventListener('loadedmetadata', startVideoProcessing);
+        videoElement.play();
+    } else {
+        processImageFile(file, file.type); // Pass both file and its type
     }
+});
 
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
-    // Release previous object URL, if any
-    if (videoElement.src) {
-        URL.revokeObjectURL(videoElement.src);
-    }
-        const file = fileInput.files[0];
-        const type = file.type;
-        
-        if (type.startsWith('video')) {
-                canvas.style.display = 'block'; // or 'inline' or any other suitable value
-            videoElement.src = URL.createObjectURL(file);
-            videoElement.addEventListener('loadedmetadata', startVideoProcessing);
-            videoElement.play();
-        } else if (type.startsWith('image')) {
-              canvas.style.display = 'block'; // or 'inline' or any other suitable value
-            // Handle image files
-            const img = new Image();
-            img.onload = function() {
-                // Fit image within canvas
-                const aspectRatio = img.width / img.height;
-                canvas.width = Math.min(window.innerWidth, img.width);
-                canvas.height = canvas.width / aspectRatio;
-
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                // Store the original image data if not already stored
-                if (originalImageData === null) {
-                    originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                }
-
-                // Create a copy of the original image data to work with
-                imageDataCopy = new ImageData(
-                    new Uint8ClampedArray(originalImageData.data),
-                    originalImageData.width,
-                    originalImageData.height
-                );
-
-                // Now apply the filter
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const pixels = imageData.data;
-                const colorFilterMatrix = getOptimizedColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
-                applyColorMatrixToPixels(pixels, colorFilterMatrix);
-                ctx.putImageData(imageData, 0, 0);
-            };
-            img.src = URL.createObjectURL(file);
-        }
-    });
 
      // Attach click events to canvases
      document.getElementById('canvas').addEventListener('click', toggleOriginalImage);
 
 });
 
+function processImageFile(fileOrBlob, type) {
+    if (type.startsWith('image')) {
+        currentMediaType = 'image';
+        canvas.style.display = 'block';
+        const img = new Image();
+        img.onload = function() {
+            // Stop ongoing animations for video
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+            // Release previous object URL, if any
+            if (videoElement.src) {
+                URL.revokeObjectURL(videoElement.src);
+            }
+
+            // Fit image within canvas
+            const aspectRatio = img.width / img.height;
+            canvas.width = Math.min(window.innerWidth, img.width);
+            canvas.height = canvas.width / aspectRatio;
+
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // Store the original image data if not already stored
+            if (originalImageData === null) {
+                originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            }
+
+            // Create a copy of the original image data to work with
+            imageDataCopy = new ImageData(
+                new Uint8ClampedArray(originalImageData.data),
+                originalImageData.width,
+                originalImageData.height
+            );
+
+            // Now apply the filter
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            const colorFilterMatrix = getOptimizedColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
+            applyColorMatrixToPixels(pixels, colorFilterMatrix);
+            ctx.putImageData(imageData, 0, 0);
+        };
+        img.src = URL.createObjectURL(fileOrBlob);
+    }
+}
 
 function toggleOriginalImage() {
-  const file = fileInput.files[0];
-  const type = file.type;
-  if (type.startsWith('image')) {
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
+    const file = fileInput.files[0];
+    const type = file.type;
 
-    if (showOriginal) {
-        // If currently showing the original, switch to the filtered
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const pixels = imageData.data;
-        const colorFilterMatrix = getOptimizedColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
-        applyColorMatrixToPixels(pixels, colorFilterMatrix);
-        ctx.putImageData(imageData, 0, 0);
-    } else {
-        // If currently showing the filtered, switch to the original
-        ctx.putImageData(originalImageData, 0, 0);
+    if (currentMediaType === 'image') {
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        if (showOriginal) {
+            // If currently showing the original, switch to the filtered
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            const colorFilterMatrix = getOptimizedColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
+            applyColorMatrixToPixels(pixels, colorFilterMatrix);
+            ctx.putImageData(imageData, 0, 0);
+        } else {
+            // If currently showing the filtered, switch to the original
+            ctx.putImageData(originalImageData, 0, 0);
+        }
+
+        // Toggle the flag for the next click
+        showOriginal = !showOriginal;
+    } else if (type.startsWith('video')) {
+        // Toggle the flag for the next click
+        showOriginal = !showOriginal;
+
+        // Cancel any existing animation frame request
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+        }
+
+        // Manually trigger a frame render to reflect the change immediately
+        renderFrame();
     }
-  }
-    // Toggle the flag for the next click
-    showOriginal = !showOriginal;
-  
 }
+
 
 
 function applyColorMatrixToPixels(pixels, colorFilterMatrix) {
