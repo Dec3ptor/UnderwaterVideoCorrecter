@@ -14,6 +14,8 @@ let blueMagicValue = 1.2;
 let thresholdRatio = 2000;
 let imageDataCopy;
 let currentMediaType = 'none'; // This can be 'image', 'video', or 'none'
+let colorCorrectedAlready = false;
+
 
 document.addEventListener("DOMContentLoaded", function() {
     const thresholdRatioSlider = document.getElementById("thresholdRatio");
@@ -82,20 +84,58 @@ const NUM_COLOR_CHANNELS = 4;
 
 let useAutoColor = false;  // Flag to determine if auto color correction should be used
 
+
+
+// Global variables to store the original and filtered image data
+//let originalImageData = null;
+let filteredImageData = null;
+//let colorCorrectedAlready = false;
+
 // Function to be called when the checkbox is clicked
 function onCheckboxClick() {
-blueMagicValue = 1.2;
-thresholdRatio = 2000;
-  useAutoColor = !useAutoColor;  // Toggle the flag
-          // Currently showing the original, switch to the filtered
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const pixels = imageData.data;
-          const colorFilterMatrix = getOptimizedColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
-          applyColorMatrixToPixels(pixels, colorFilterMatrix);
-          ctx.putImageData(imageData, 0, 0);
+    if (!colorCorrectedAlready) {
+        // Store the original image data if it hasn't been stored yet
+        if (!originalImageData) {
+            originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+
+        // Apply color correction and store the filtered image data
+        //const pixels = originalImageData.data.slice(); // Copy the original pixels
+        blueMagicValue = 1.2;
+        thresholdRatio = 2000;
+          useAutoColor = !useAutoColor;  // Toggle the flag
+                  // Currently showing the original, switch to the filtered
+                  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                  const pixels = imageData.data;
+                  const colorFilterMatrix = getOptimizedColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
+                  applyColorMatrixToPixels(pixels, colorFilterMatrix);
+                  ctx.putImageData(imageData, 0, 0);
+                  colorCorrectedAlready = true;
+    } else {
+        // If the color correction was already applied, revert to the original image
+            ctx.putImageData(originalImageData, 0, 0);
+        
+        colorCorrectedAlready = false;
+
+    }
+        // Toggle the colorCorrectedAlready flag
+       // colorCorrectedAlready = !colorCorrectedAlready;
+
+        //         // Simulate color correction by inverting the colors
+        // // This is just for testing purposes
+        // let pixels = originalImageData.data;
+        // for (let i = 0; i < pixels.length; i += 4) {
+        //     pixels[i] = 255 - pixels[i];        // R
+        //     pixels[i + 1] = 255 - pixels[i + 1];  // G
+        //     pixels[i + 2] = 255 - pixels[i + 2];  // B
+        //     // Alpha (i + 3) is left unchanged
+        // }
 }
 
+function colorCorrectEnable() {
 
+              
+}
 
 function getKey(settings) {
     return JSON.stringify(settings);
@@ -520,7 +560,28 @@ function renderFrame() {
     }
 }
 
-
+function toggleMediaVisibility(show) {
+    const canvas = document.getElementById('canvas');
+    const video = document.getElementById('video');
+    const filteredVideo = document.getElementById('filteredVideo');
+    const videoControls = document.querySelector('.video-controls');
+  
+    if (show) {
+      canvas.classList.remove('hidden');
+      video.classList.remove('hidden');
+      filteredVideo.classList.remove('hidden');
+      videoControls.classList.remove('hidden');
+      console.log("Media is now visible");
+    } else {
+      canvas.classList.add('hidden');
+      video.classList.add('hidden');
+      filteredVideo.classList.add('hidden');
+      videoControls.classList.add('hidden');
+      console.log("Media is now hidden");
+    }
+  }
+  
+  
 
 // Inside your DOMContentLoaded function
 document.addEventListener("DOMContentLoaded", function() {
@@ -528,6 +589,28 @@ document.addEventListener("DOMContentLoaded", function() {
     
     canvasElement = document.getElementById('canvas');
     ctx = canvasElement.getContext('2d', { willReadFrequently: true });
+
+    // Set canvas size
+    canvas.width = 600; // for example
+    canvas.height = 400; // for example
+
+    // Add text
+    ctx.fillStyle = 'black'; // Text color
+    ctx.font = '40px Arial'; // Text style
+    ctx.textAlign = 'center';
+    ctx.fillText('Click to upload media', canvas.width / 2, canvas.height / 2);
+
+    // Event listener for canvas click
+    canvas.addEventListener('click', function() {
+        // Check if media is loaded
+        if (currentMediaType == 'image' || currentMediaType =='video') { // mediaLoaded is a flag you should set when media is loaded
+            toggleOriginalImage();
+        } else {
+            // If no media is loaded, open the file input dialog
+            document.getElementById('fileInput').click();
+        }
+    });
+
     videoElement = document.getElementById('video'); 
     const fileInput = document.getElementById('fileInput');
     const rewindBtn = document.getElementById('rewindBtn');
@@ -539,6 +622,27 @@ document.addEventListener("DOMContentLoaded", function() {
 
     
     document.getElementById('loadImageFromUrl').addEventListener('click', async function() {
+    
+    //         // Reset global variables
+    // smoothedMatrix = null;  // Reset smoothed color matrix
+    // alpha = 0.9;  // Reset alpha for smoothing
+    // originalImageData = null;  // Reset original image data
+    // isShowingOriginal = false;  // Reset flag for showing original content
+    // showOriginal = false; // Reset the flag for toggling original image
+
+    // const file = fileInput.files[0];
+    // if (file.type.startsWith('video')) {
+    //     // ... [Your existing logic for video processing]
+    //     canvas.style.display = 'block'; // or 'inline' or any other suitable value
+    //     videoElement.src = URL.createObjectURL(file);
+    //     videoElement.addEventListener('loadedmetadata', startVideoProcessing);
+    //     //toggleMediaVisibility(true);
+    //     videoElement.play();
+    // } else {
+    //     processImageFile(file, file.type); // Pass both file and its type
+    // }
+
+    
         const imageUrl = document.getElementById('imageUrl').value;
         if (imageUrl) {
             try {
@@ -550,8 +654,114 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.error("Error fetching the image:", error);
             }
         }
+            // ... [Your existing logic for resetting variables and clearing canvas]
+
     });
 
+
+ // Event listener for file input change
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    colorCorrectEnable = false;
+                // Reset global variables
+    smoothedMatrix = null;  // Reset smoothed color matrix
+    alpha = 0.9;  // Reset alpha for smoothing
+    originalImageData = null;  // Reset original image data
+    isShowingOriginal = false;  // Reset flag for showing original content
+    showOriginal = false; // Reset the flag for toggling original image
+
+    const file = event.target.files[0];
+    if (file) {
+        uploadFile(file); // Call the function to process and display the file
+    }
+});
+
+// Event listeners for drag and drop
+const dropArea = document.getElementById('canvas'); // Assuming you want to drop the file on the canvas
+
+// Prevent default drag behaviors
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+// Highlight drop area when item is dragged over it
+['dragenter', 'dragover'].forEach(eventName => {
+  dropArea.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+  dropArea.classList.add('highlight');
+}
+
+function unhighlight(e) {
+  dropArea.classList.remove('highlight');
+}
+
+// Handle dropped files
+dropArea.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+  let dt = e.dataTransfer;
+  let files = dt.files;
+
+  if (files.length) {
+    uploadFile(files[0]); // Call the function to process and display the file
+  }
+}
+  
+  function uploadFile(file) {
+    // Check the file type to determine how to handle it
+    if (file.type.startsWith('image/')) {
+            currentMediaType = 'image';
+      // It's an image file, read and display it on the canvas
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          // Adjust canvas size to image size or scale it accordingly
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    } else if (file.type.startsWith('video/')) {
+        currentMediaType = 'video';
+
+      // It's a video file, create a video element and play it
+      const video = document.createElement('video');
+      video.src = URL.createObjectURL(file);
+      video.controls = true;
+      video.autoplay = true;
+      video.onloadedmetadata = function() {
+        // Adjust canvas size to video size or scale it accordingly
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        // Draw the video frame to the canvas
+        video.addEventListener('play', function() {
+          const draw = function() {
+            if (!video.paused && !video.ended) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              requestAnimationFrame(draw);
+            }
+          };
+          draw();
+        });
+      };
+      // Append the video element to the body or to a specific container if needed
+      // document.body.appendChild(video); // Uncomment this line if you want to add the video to the body
+    }
+  }
+  
 
 // document.getElementById('whiteBalanceInput').addEventListener('input', function() {
 //     whiteBalance = this.value;
@@ -650,30 +860,13 @@ document.getElementById('brightnessInput').addEventListener('input', function() 
     brightness = this.value;
 });
 
-fileInput.addEventListener('change', function() {
-    // ... [Your existing logic for resetting variables and clearing canvas]
-    // Reset global variables
-    smoothedMatrix = null;  // Reset smoothed color matrix
-    alpha = 0.9;  // Reset alpha for smoothing
-    originalImageData = null;  // Reset original image data
-    isShowingOriginal = false;  // Reset flag for showing original content
-    showOriginal = false; // Reset the flag for toggling original image
+// document.getElementById('fileInput').addEventListener('change', function() {
 
-    const file = fileInput.files[0];
-    if (file.type.startsWith('video')) {
-        // ... [Your existing logic for video processing]
-        canvas.style.display = 'block'; // or 'inline' or any other suitable value
-        videoElement.src = URL.createObjectURL(file);
-        videoElement.addEventListener('loadedmetadata', startVideoProcessing);
-        videoElement.play();
-    } else {
-        processImageFile(file, file.type); // Pass both file and its type
-    }
-});
+// });
 
 
      // Attach click events to canvases
-     document.getElementById('canvas').addEventListener('click', toggleOriginalImage);
+     //document.getElementById('canvas').addEventListener('click', toggleOriginalImage);
 
 });
 
@@ -702,6 +895,7 @@ function processImageFile(fileOrBlob, type) {
             canvas.height = canvas.width / aspectRatio;
 
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            //toggleMediaVisibility(true);
 
             // Store the original image data if not already stored
             if (originalImageData === null) {
