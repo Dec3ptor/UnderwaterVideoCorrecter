@@ -234,6 +234,12 @@ button,
   background-image: none;
   /* 2 */
 }
+.selector {
+  -webkit-appearance: none; /* For Safari and older Chrome browsers */
+  -moz-appearance: none;    /* For old Firefox browsers */
+  appearance: none;         /* Standard syntax */
+}
+
 
 /*
 Use the modern Firefox focus style for all focusable elements.

@@ -1,88 +1,91 @@
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image and Video Color Filter</title>
     <link href="output.css" rel="stylesheet">
-  </head>
-<body>
-  <script src="content.js"></script>
-<h1>Image and Video Color Filter</h1>
+</head>
+<body class="bg-gray-100 font-sans leading-normal text-gray-800">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold my-4 md:my-6">Image and Video Color Filter</h1>
 
-<h3>Underwater Media</h3>
-<input type="file" id="fileInput" accept="image/*,video/*">
-<input type="text" id="imageUrl" placeholder="Paste image link here">
-<button id="loadImageFromUrl">Load Image</button>
+        <h3 class="text-2xl font-semibold mb-4">Underwater Media</h3>
+        <div class="mb-4">
+            <input type="file" id="fileInput" accept="image/*,video/*" class="mb-2 block">
+            <input type="text" id="imageUrl" placeholder="Paste image link here" class="mb-2 block p-2 border rounded">
+            <button id="loadImageFromUrl" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Load Image</button>
+        </div>
 
-<canvas id="canvas" style="display:none;"></canvas> <!-- Initially hidden -->
-<video id="video" controls style="display:none;"></video> <!-- Original video, initially hidden -->
-<video id="filteredVideo" controls style="display:none;"></video>
+        <canvas id="canvas" class="hidden"></canvas>
+        <video id="video" controls class="hidden"></video>
+        <video id="filteredVideo" controls class="hidden"></video>
 
+        <div id="bufferBar" class="buffering-hidden"></div>
+        <div id="buffering" class="buffering-hidden">Buffering...</div>
 
-<div id="bufferBar" class="buffering-hidden"></div>
-<div id="buffering" class="buffering-hidden">Buffering...</div>
+        <button id="resetFilter" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Reset Filter</button>
+        <button id="downloadBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Download Screencap</button>
 
-<button id="resetFilter">Reset Filter</button>
+        <div class="flex justify-between my-4">
+            <button id="rewindMoreBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Rewind 15s</button>
+            <button id="rewindBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Rewind 5s</button>
+            <button id="playPauseBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Pause</button>
+            <button id="skipBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Skip 5s</button>
+            <button id="skipMoreBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Skip 15s</button>
+            <button id="muteBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">Mute</button>
+        </div>
 
-<!-- Adding preset buttons -->
-<!-- <button id="Sample1">Sample 1</button>
-<button id="Sample2">Sample 2</button>
-<button id="Sample3">Sample 3</button>
-<button id="Sample4">Sample 4</button>
-<button id="Sample5">Sample 5</button>
-<button id="Sample6">Sample 6</button> -->
-<!-- <button id="applyCustomMatrix">Apply Custom Color Matrix</button> -->
-<button id="downloadBtn">Download Screencap</button>
+        <h3 class="text-xl font-semibold mb-2">Settings</h3>
+        <div class="mb-4">
+            <label for="Checkbox" class="inline-flex items-center">
+                <input type="checkbox" id="Checkbox" onclick="onCheckboxClick()" class="form-checkbox">
+                <span class="ml-2">Use Auto Color Correction</span>
+            </label>
+        </div>
 
-<button id="rewindMoreBtn">Rewind 15s</button>
-<button id="rewindBtn">Rewind 5s</button>
-<button id="playPauseBtn">Pause</button>
-<button id="skipBtn">Skip 5s</button>
-<button id="skipMoreBtn">Skip 15s</button>
-<button id="muteBtn">Mute</button>
+        <div class="mb-4">
+            <label for="depth" class="block mb-2">Depth (meters):</label>
+            <input type="number" id="depthInput" value="20" min="0" max="100" class="block w-full p-2 border rounded">
+        </div>
 
-<br>
-<h3>Settings</h3>
-  <input type="checkbox" id="Checkbox" onclick="onCheckboxClick()"> Use Auto Color Correction
+        <div class="mb-4">
+            <label for="thresholdRatio" class="block mb-2">Threshold Ratio:</label>
+            <input type="range" id="thresholdRatio" min="100" max="5000" step="100" value="2000" class="block w-full">
+            <span id="thresholdRatioValue" class="block text-right">2000</span>
+        </div>
 
-<label for="depth">Depth (meters): </label>
-<input type="number" id="depthInput" value="20" min="0" max="100">
-<br>
-<button id="resetBtn">Reset Filters</button>
+        <div class="mb-4">
+            <label for="blueMagicValue" class="block mb-2">Blue Magic Value:</label>
+            <input type="range" id="blueMagicValue" min="0.1" max="5" step="0.1" value="1.2" class="block w-full">
+            <span id="blueMagicValueValue" class="block text-right">1.2</span>
+        </div>
 
-<div>
-  <label for="thresholdRatio">Threshold Ratio:</label>
-  <input type="range" id="thresholdRatio" min="100" max="5000" step="100" value="2000">
-  <span id="thresholdRatioValue">2000</span>
-</div>
-<div>
-  <label for="blueMagicValue">Blue Magic Value:</label>
-  <input type="range" id="blueMagicValue" min="0.1" max="5" step="0.1" value="1.2">
-  <span id="blueMagicValueValue">1.2</span>
-  </div>
+        <!-- RGB Inputs -->
+        <div class="grid grid-cols-3 gap-4 mb-4">
+            <div>
+                <label for="redInput" class="block mb-2">Red:</label>
+                <input type="range" id="redInput" min="0" max="255" value="255" class="w-full">
+                <span id="redValue" class="block text-right">255</span>
+            </div>
+            <div>
+                <label for="greenInput" class="block mb-2">Green:</label>
+                <input type="range" id="greenInput" min="0" max="255" value="255" class="w-full">
+                <span id="greenValue" class="block text-right">255</span>
+            </div>
+            <div>
+                <label for="blueInput" class="block mb-2">Blue:</label>
+                <input type="range" id="blueInput" min="0" max="255" value="255" class="w-full">
+                <span id="blueValue" class="block text-right">255</span>
+            </div>
+        </div>
 
-<!-- RGB Inputs -->
-<div>
-  <label for="redInput">Red: </label>
-  <input type="range" id="redInput" min="0" max="255" value="255">
-  <span id="redValue">255</span>
-</div>
-<div>
-  <label for="greenInput">Green: </label>
-  <input type="range" id="greenInput" min="0" max="255" value="255">
-  <span id="greenValue">255</span>
-</div>
-<div>
-  <label for="blueInput">Blue: </label>
-  <input type="range" id="blueInput" min="0" max="255" value="255">
-  <span id="blueValue">255</span>
-</div>
+        <div class="mb-4">
+            <label for="brightness" class="block mb-2">Brightness:</label>
+            <input type="range" id="brightnessInput" min="0" max="200" value="100" class="block w-full">
+        </div>
+    </div>
 
-
-
-<label for="brightness">Brightness: </label>
-<input type="range" id="brightnessInput" min="0" max="200" value="100">
-<br>
-  
-
+    <script src="content.js"></script>
 </body>
 </html>
