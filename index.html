@@ -1,77 +1,82 @@
-<div>
-  <div class="canvas-paper"></div>
-  <div class="canvas-paper">
-    <div>
-      <div class="bg-blue-100 border-blue-200">
-        <div></div>
-        <div></div>
-        <div>Image and Video Color Filter</div>
-        <div href="https://windframe.devwares.com/output.css"></div>
-        <div class="mx-auto px-4 container">
-          <p class="text-center text-2xl font-bold text-gray-900 my-8">Underwater Image & Video Colour
-              Correction</p>
-          <div class="items-center flex flex-col space-y-4">
-            <label class="bg-blue-600 text-white font-medium py-2 px-4 hover:bg-blue-700 rounded cursor-pointer">Choose
-                a file</label>
-            <input type="file" class="hidden">
-            <input type="text" placeholder="Paste image link here" class="text-input">
-            <button type="submit" class="btn">Load Image Link</button>
-            <div></div>
-            <div class="hidden"></div>
-            <div class="hidden"></div>
-            <div class="video-controls video-loaded">
-              <button type="submit" class="btn">Reset Filter</button>
-              <button type="submit" class="btn">Download Screencap</button>
-              <button type="submit" class="btn">Rewind 15s</button>
-              <button type="submit" class="btn">Rewind 5s</button>
-              <button type="submit" class="btn">Pause</button>
-              <button type="submit" class="btn">Skip 5s</button>
-              <button type="submit" class="btn">Skip 15s</button>
-              <button type="submit" class="btn">Mute</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image and Video Color Filter</title>
+    <link href="output.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4">
+        <h1 class="text-center text-4xl font-bold text-gray-900 my-8">Underwater Image & Video Colour Correction</h1>
+        
+        <div class="flex flex-col items-center space-y-4">
+          <label for="fileInput" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded cursor-pointer">
+            Choose a file
+          </label>
+          <input type="file" id="fileInput" accept="image/*,video/*" class="hidden">
+                    <input type="text" id="imageUrl" placeholder="Paste image link here" class="text-input">
+            <button id="loadImageFromUrl" class="btn">Load Image Link</button>
+
+            <canvas id="canvas"></canvas> <!-- Initially hidden -->
+            <video id="video" controls class="hidden"></video> <!-- Original video, initially hidden -->
+            <video id="filteredVideo" controls class="hidden"></video>
+
+            <div class="video-controls video-loaded"> <!-- Add 'video-loaded' class when video is loaded -->
+                <button id="resetFilter" class="btn">Reset Filter</button>
+                <button id="downloadBtn" class="btn">Download Screencap</button>
+                <button id="rewindMoreBtn" class="btn">Rewind 15s</button>
+                <button id="rewindBtn" class="btn">Rewind 5s</button>
+                <button id="playPauseBtn" class="btn">Pause</button>
+                <button id="skipBtn" class="btn">Skip 5s</button>
+                <button id="skipMoreBtn" class="btn">Skip 15s</button>
+                <button id="muteBtn" class="btn">Mute</button>
             </div>
-            <p class="settings-header">Settings</p>
-            <label class="checkbox-label">
-              Use Auto Color Correction
-              <input type="checkbox">
+
+            <h3 class="settings-header">Settings</h3>
+            <label for="Checkbox" class="checkbox-label">
+                <input type="checkbox" id="Checkbox" onclick="onCheckboxClick()"> Use Auto Color Correction
             </label>
+
             <div class="settings-container">
-              <div class="slider-container">
-                <label class="slider-label">Depth (meters):</label>
-                <input type="number" class="number-input">
-              </div>
-              <div class="slider-container">
-                <label class="slider-label">Threshold Ratio:</label>
-                <input type="range" class="slider">
-                <span class="slider-value">2000</span>
-              </div>
-              <div class="slider-container">
-                <label class="slider-label">Blue Magic Value:</label>
-                <input type="range" class="slider">
-                <span class="slider-value">1.2</span>
-              </div>
-              <div class="slider-container">
-                <label class="slider-label">Red:</label>
-                <input type="range" class="slider">
-                <span class="slider-value">255</span>
-              </div>
-              <div class="slider-container">
-                <label class="slider-label">Green:</label>
-                <input type="range" class="slider">
-                <span class="slider-value">255</span>
-              </div>
-              <div class="slider-container">
-                <label class="slider-label">Blue:</label>
-                <input type="range" class="slider">
-                <span class="slider-value">255</span>
-              </div>
-              <div class="slider-container">
-                <label class="slider-label">Brightness:</label>
-                <input type="range" class="slider">
-              </div>
+                <div class="slider-container">
+                    <label for="depth" class="slider-label">Depth (meters):</label>
+                    <input type="number" id="depthInput" value="20" min="0" max="100" class="number-input">
+                </div>
+                <div class="slider-container">
+                    <label for="thresholdRatio" class="slider-label">Threshold Ratio:</label>
+                    <input type="range" id="thresholdRatio" min="100" max="5000" step="100" value="2000" class="slider">
+                    <span id="thresholdRatioValue" class="slider-value">2000</span>
+                </div>
+                <div class="slider-container">
+                    <label for="blueMagicValue" class="slider-label">Blue Magic Value:</label>
+                    <input type="range" id="blueMagicValue" min="0.1" max="5" step="0.1" value="1.2" class="slider">
+                    <span id="blueMagicValueValue" class="slider-value">1.2</span>
+                </div>
+                <!-- RGB Inputs -->
+                <div class="slider-container">
+                    <label for="redInput" class="slider-label">Red:</label>
+                    <input type="range" id="redInput" min="0" max="255" value="255" class="slider">
+                    <span id="redValue" class="slider-value">255</span>
+                </div>
+                <div class="slider-container">
+                    <label for="greenInput" class="slider-label">Green:</label>
+                    <input type="range" id="greenInput" min="0" max="255" value="255" class="slider">
+                    <span id="greenValue" class="slider-value">255</span>
+                </div>
+                <div class="slider-container">
+                    <label for="blueInput" class="slider-label">Blue:</label>
+                    <input type="range" id="blueInput" min="0" max="255" value="255" class="slider">
+                    <span id="blueValue" class="slider-value">255</span>
+                </div>
+                <div class="slider-container">
+                    <label for="brightness" class="slider-label">Brightness:</label>
+                    <input type="range" id="brightnessInput" min="0" max="200" value="100" class="slider">
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
+
+    <script src="content.js"></script>
+</body>
+</html>
