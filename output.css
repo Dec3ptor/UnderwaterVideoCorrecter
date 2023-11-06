@@ -715,6 +715,8 @@ h3 {
   height: auto;
   /* Height can be auto if the canvas has an intrinsic height */
   /* More styles if necessary */
+  margin-bottom: 20px;
+  /* Adds space below the canvas */
 }
 
 #canvas {
@@ -749,7 +751,7 @@ h3 {
   /* Center horizontally */
   align-items: center;
   /* Center vertically */
-  height: 300px;
+  height: auto;
   /* Or as per your requirement */
 }
 
@@ -969,16 +971,27 @@ input[type="range"] {
   text-align: center;
 }
 
-/* Smaller devices (phones) */
+.upload-icon {
+  width: 2rem;
+  /* Smaller icon on small screens */
+  top: 50%;
+  /* Start with the mobile view position */
+  left: 50%;
+  transform: translate(-50%, -200%);
+}
 
-@media (max-width: 640px) {
-  .canvas {
+@media (min-width: 480px) {
+}
+
+@media (min-width: 640px) {
+  body {
+    padding: 1.5rem;
   }
 
-  .upload-label {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    /* Smaller text on small screens */
+  #canvas,
+    #video,
+    #filteredVideo {
+    max-width: 56rem;
   }
 
   .upload-icon {
@@ -989,56 +1002,38 @@ input[type="range"] {
     left: 50%;
     transform: translate(-50%, -200%);
   }
-}
 
-/* Tablets */
-
-@media (min-width: 640px) {
-  .upload-form {
-    padding-left: 1rem;
-    padding-right: 1rem;
-    /* Adjust padding on tablet screens */
+  .settings-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 }
-
-/* Small laptops/large tablets */
 
 @media (min-width: 768px) {
-  .upload-form {
-    padding-left: 2rem;
-    padding-right: 2rem;
-    /* Adjust padding for larger tablets/small laptops */
-  }
-}
-
-/* Laptops/Desktops */
-
-@media (min-width: 1024px) {
-  .upload-form {
-    padding-left: 3rem;
-    padding-right: 3rem;
-    /* Larger padding for laptops and desktops */
-  }
-
-  .upload-label {
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-    /* Larger text for larger screens */
+  h1 {
+    font-size: 3rem;
+    line-height: 1;
   }
 
   .upload-icon {
-    width: 4rem;
-    /* Larger icon for larger screens */
+    width: 2rem;
+    /* Smaller icon on small screens */
+    top: 50%;
+    /* Start with the mobile view position */
+    left: 50%;
+    transform: translate(-50%, -200%);
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
 }
 
-/* Large screens */
-
-@media (min-width: 1280px) {
-  .upload-form {
-    padding-left: 4rem;
-    padding-right: 4rem;
-    /* Even larger padding for larger screens */
+@media (min-width: 1024px) {
+  .settings-container {
+    padding: 1.5rem;
   }
 }
 

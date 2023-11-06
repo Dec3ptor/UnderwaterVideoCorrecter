@@ -20,6 +20,8 @@ h3 {
     width: 100%; /* Responsive width */
     height: auto; /* Height can be auto if the canvas has an intrinsic height */
     /* More styles if necessary */
+    margin-bottom: 20px; /* Adds space below the canvas */
+
   }
   
   #canvas {
@@ -49,7 +51,7 @@ h3 {
     display: flex; /* Use flexbox for easier centering */
     justify-content: center; /* Center horizontally */
     align-items: center; /* Center vertically */
-    height: 300px; /* Or as per your requirement */
+    height: auto; /* Or as per your requirement */
   }
   
   /* Responsive fileInput label */
@@ -156,15 +158,26 @@ input[type="range"] {
 /* Base mobile styles */
 .upload-form {
     @apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center;
+    
 }
-
-/* Smaller devices (phones) */
-@media (max-width: 640px) {
-    .canvas {
-        
+.upload-icon {
+    @apply w-8; /* Smaller icon on small screens */
+    top: 50%; /* Start with the mobile view position */
+    left: 50%;
+    transform: translate(-50%, -200%);
+}
+@media (min-width: 480px) {
+    
+}
+@media (min-width: 640px) {
+    body {
+        @apply p-6;
     }
-    .upload-label {
-        @apply text-sm; /* Smaller text on small screens */
+
+    #canvas,
+    #video,
+    #filteredVideo {
+        @apply max-w-4xl;
     }
     .upload-icon {
         @apply w-8; /* Smaller icon on small screens */
@@ -172,38 +185,28 @@ input[type="range"] {
         left: 50%;
         transform: translate(-50%, -200%);
     }
-}
-
-/* Tablets */
-@media (min-width: 640px) {
-    .upload-form {
-        @apply px-4; /* Adjust padding on tablet screens */
+    .settings-container {
+        @apply flex justify-between items-center;
     }
 }
 
-/* Small laptops/large tablets */
 @media (min-width: 768px) {
-    .upload-form {
-        @apply px-8; /* Adjust padding for larger tablets/small laptops */
-    }
-}
-
-/* Laptops/Desktops */
-@media (min-width: 1024px) {
-    .upload-form {
-        @apply px-12; /* Larger padding for laptops and desktops */
-    }
-    .upload-label {
-        @apply text-lg; /* Larger text for larger screens */
+    h1 {
+        @apply text-5xl;
     }
     .upload-icon {
-        @apply w-16; /* Larger icon for larger screens */
+        @apply w-8; /* Smaller icon on small screens */
+        top: 50%; /* Start with the mobile view position */
+        left: 50%;
+        transform: translate(-50%, -200%);
+    }
+    h3 {
+        @apply text-xl;
     }
 }
 
-/* Large screens */
-@media (min-width: 1280px) {
-    .upload-form {
-        @apply px-16; /* Even larger padding for larger screens */
+@media (min-width: 1024px) {
+    .settings-container {
+        @apply p-6;
     }
 }
