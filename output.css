@@ -721,7 +721,7 @@ h3 {
   width: 100%;
   /* Make canvas responsive */
   /* Set a max-width if necessary */
-  height: 70%;
+  height: auto;
   /* Height can be auto if the canvas has an intrinsic height */
   /* More styles */
 }
