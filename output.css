@@ -620,9 +620,9 @@ video {
   border-radius: 0.25rem;
 }
 
-.border-blue-200 {
-  --tw-border-opacity: 1;
-  border-color: rgb(191 219 254 / var(--tw-border-opacity));
+.bg-blue-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 246 255 / var(--tw-bg-opacity));
 }
 
 .bg-blue-600 {
@@ -633,11 +633,6 @@ video {
 .bg-gray-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
-}
-
-.bg-blue-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(219 234 254 / var(--tw-bg-opacity));
 }
 
 .px-4 {
@@ -657,11 +652,6 @@ video {
 .text-4xl {
   font-size: 2.25rem;
   line-height: 2.5rem;
-}
-
-.text-2xl {
-  font-size: 1.5rem;
-  line-height: 2rem;
 }
 
 .font-bold {
@@ -712,6 +702,45 @@ h3 {
   font-weight: 600;
   --tw-text-opacity: 1;
   color: rgb(31 41 55 / var(--tw-text-opacity));
+}
+
+/* Positioning the upload form over the canvas */
+
+.upload-form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.file-input {
+  display: none;
+  /* Hide the actual file input */
+}
+
+.upload-label {
+  display: inline-block;
+  cursor: pointer;
+  /* Add styles for your label that looks like a button */
+}
+
+.upload-icon {
+  width: 20%;
+  top: 50%;
+  left: 50%;
+  transform: translate(200%, -50%);
+  text-align: center;
+}
+
+.browse-button {
+  background-color: #007bff;
+  /* Your blue color */
+  color: white;
+  padding: 12px 24px;
+  border-radius: 5px;
+  font-size: 16px;
+  /* More button styles */
 }
 
 /* Utility classes for video and image display */

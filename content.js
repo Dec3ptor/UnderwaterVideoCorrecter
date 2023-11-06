@@ -581,24 +581,26 @@ function toggleMediaVisibility(show) {
     }
   }
   
-  
+  function getFileName()
+{
+    var x = document.getElementById('entry_value')
+    document.getElementById('fileName').innerHTML = x.value.split('\\').pop()
+}
 
 // Inside your DOMContentLoaded function
 document.addEventListener("DOMContentLoaded", function() {
 
     
+    // Your existing script to set up the canvas
     canvasElement = document.getElementById('canvas');
     ctx = canvasElement.getContext('2d', { willReadFrequently: true });
+    canvasElement.width = 600;
+    canvasElement.height = 200;
+    // ctx.fillStyle = 'black';
+    // ctx.font = '35px Arial';
+    // ctx.textAlign = 'center';
+    // ctx.fillText('Click to upload media', canvasElement.width / 2, canvasElement.height / 2);
 
-    // Set canvas size
-    canvas.width = 600; // for example
-    canvas.height = 400; // for example
-
-    // Add text
-    ctx.fillStyle = 'black'; // Text color
-    ctx.font = '40px Arial'; // Text style
-    ctx.textAlign = 'center';
-    ctx.fillText('Click to upload media', canvas.width / 2, canvas.height / 2);
 
     // Event listener for canvas click
     canvas.addEventListener('click', function() {
@@ -607,7 +609,7 @@ document.addEventListener("DOMContentLoaded", function() {
             toggleOriginalImage();
         } else {
             // If no media is loaded, open the file input dialog
-            document.getElementById('fileInput').click();
+            //document.getElementById('fileInput').click();
         }
     });
 
@@ -661,6 +663,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
  // Event listener for file input change
 document.getElementById('fileInput').addEventListener('change', function(event) {
+    if (event.target.files.length === 0) {
+        // User closed the dialog without selecting a file
+        formElement.style.pointerEvents = 'auto';
+        document.querySelector('.upload-label').style.pointerEvents = 'auto';
+      } else {
+        // Files selected, proceed with the upload
+        uploadFile(event.target.files[0]);
+      }
+
     colorCorrectEnable = false;
                 // Reset global variables
     smoothedMatrix = null;  // Reset smoothed color matrix
@@ -675,35 +686,36 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     }
 });
 
-// Event listeners for drag and drop
-const dropArea = document.getElementById('canvas'); // Assuming you want to drop the file on the canvas
+// Define the drop area to include both the form and the canvas
+const dropArea = document.getElementById('uploadForm');
+const canvasArea = document.getElementById('canvas');
 
-// Prevent default drag behaviors
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-  dropArea.addEventListener(eventName, preventDefaults, false);
-});
-
+// This function will be used for both the form and the canvas
 function preventDefaults(e) {
   e.preventDefault();
   e.stopPropagation();
 }
 
-// Highlight drop area when item is dragged over it
-['dragenter', 'dragover'].forEach(eventName => {
-  dropArea.addEventListener(eventName, highlight, false);
+// This will apply the event listeners to both the form and the canvas
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, preventDefaults, false);
+  canvasArea.addEventListener(eventName, preventDefaults, false);
 });
 
-['dragleave', 'drop'].forEach(eventName => {
-  dropArea.addEventListener(eventName, unhighlight, false);
-});
+// Function to handle the file drop
+function handleDrop(e) {
+  let dt = e.dataTransfer;
+  let files = dt.files;
 
-function highlight(e) {
-  dropArea.classList.add('highlight');
+  if (files.length) {
+    uploadFile(files[0]); // Process and display the file
+    dropArea.style.display = 'none'; // Optionally hide the form
+  }
 }
 
-function unhighlight(e) {
-  dropArea.classList.remove('highlight');
-}
+// Attach the drop handler to both elements
+dropArea.addEventListener('drop', handleDrop, false);
+canvasArea.addEventListener('drop', handleDrop, false);
 
 // Handle dropped files
 dropArea.addEventListener('drop', handleDrop, false);
@@ -714,6 +726,7 @@ function handleDrop(e) {
 
   if (files.length) {
     uploadFile(files[0]); // Call the function to process and display the file
+    uploadForm.style.display = 'none'; // Hide the form
   }
 }
   
@@ -722,6 +735,7 @@ function handleDrop(e) {
     if (file.type.startsWith('image/')) {
             currentMediaType = 'image';
       // It's an image file, read and display it on the canvas
+      uploadForm.style.display = 'none'; // Hide the form
       const reader = new FileReader();
       reader.onload = function(e) {
         const img = new Image();
@@ -761,7 +775,13 @@ function handleDrop(e) {
       // document.body.appendChild(video); // Uncomment this line if you want to add the video to the body
     }
   }
-  
+  // Event listener for file input change
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) {
+      processFile(e.target.files[0]);
+      formElement.style.display = 'none'; // Hide the form
+    }
+  });
 
 // document.getElementById('whiteBalanceInput').addEventListener('input', function() {
 //     whiteBalance = this.value;
