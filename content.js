@@ -72,9 +72,15 @@ function updateSettingsVisibility() {
     const settingsContainer = document.querySelector('.settings-container');
   
     if (currentMediaType != 'none') {
-      settingsContainer.classList.remove('hidden');
+      settingsContainer.classList.remove('hidden');  document.getElementById('fileInput').classList.add('hidden');
+      document.getElementById('imageUrl').classList.add('hidden');
+      document.getElementById('loadImageFromUrl').classList.add('hidden');
+
     } else {
       settingsContainer.classList.add('hidden');
+      document.getElementById('fileInput').classList.add('auto');
+      document.getElementById('imageUrl').classList.add('auto');
+      document.getElementById('loadImageFromUrl').classList.add('auto');
     }
   }
 
@@ -662,6 +668,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 const response = await fetch(proxyUrl);
                 const imageBlob = await response.blob();
                 processImageFile(imageBlob, imageBlob.type);
+                uploadForm.style.display = 'none'; // Hide the form
+
             } catch (error) {
                 console.error("Error fetching the image:", error);
             }
@@ -681,6 +689,7 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
         // Files selected, proceed with the upload
         uploadFile(event.target.files[0]);
         updateSettingsVisibility();
+
       }
 
     colorCorrectEnable = false;
