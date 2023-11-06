@@ -717,7 +717,8 @@ h3 {
   width: 100%;
   /* Make canvas responsive */
   /* Set a max-width if necessary */
-  /*height: auto; /* Maintain aspect ratio */
+  height: auto;
+  /* Maintain aspect ratio */
   /* More styles */
 }
 
@@ -967,11 +968,6 @@ input[type="range"] {
 /* Smaller devices (phones) */
 
 @media (max-width: 640px) {
-  .canvas {
-    height: 700;
-    /* Maintain aspect ratio */
-  }
-
   .upload-label {
     font-size: 0.875rem;
     line-height: 1.25rem;
