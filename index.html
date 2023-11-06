@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image and Video Color Filter</title>
+    <title>Underwater Image & Video Colour Correction</title>
     <link href="output.css" rel="stylesheet">
 </head>
 <body class="bg-blue-50">
     <div class="container mx-auto px-4">
-        <h1 class="text-center text-4xl font-bold text-gray-900 my-8">Underwater Image & Video Colour Correction</h1>
+        <h1 class="text-center text-3xl font-bold text-gray-900 my-8">Underwater Image & Video Colour Correction</h1>
         
         <div class="flex flex-col items-center space-y-4">
 
          
          
-          <input type="file" id="fileInput" accept="image/*,video/*" class="hidden">
-                    <input type="text" id="imageUrl" placeholder="Paste image link here" class="text-input">
-            <button id="loadImageFromUrl" class="btn">Load Image Link</button>
+
 
 
 
@@ -36,8 +34,14 @@
                         </div>      
                       <!--</label>-->
                   </form>
-              <canvas id="canvas" class="bg-gray-50" ></canvas>            </div>
-            
+              <canvas id="canvas" class="bg-gray-50" ></canvas>
+                        </div>
+
+                        <input type="file" id="fileInput" accept="image/*,video/*" class="hidden">
+                        <input type="text" id="imageUrl" placeholder="Paste image link here" class="text-input">
+                <button id="loadImageFromUrl" class="btn">Load Image Link</button>
+
+                
             <video id="video" controls class="hidden"></video> <!-- Original video, initially hidden -->
             <video id="filteredVideo" controls class="hidden"></video>
 
@@ -52,12 +56,15 @@
                 <button id="muteBtn" class="btn">Mute</button>
             </div>
 
-            <h3 class="settings-header">Settings</h3>
-            <label for="Checkbox" class="checkbox-label">
-                <input type="checkbox" id="Checkbox" onclick="onCheckboxClick()"> Use Auto Color Correction
-            </label>
 
-            <div class="settings-container">
+
+
+            <div class="settings-container hidden">
+                <h3 class="settings-header">Settings</h3>
+                <label for="Checkbox" class="checkbox-label">
+                    <input type="checkbox" id="Checkbox" onclick="onCheckboxClick()"> Use Auto Color Correction
+                </label>
+                
                 <div class="slider-container">
                     <label for="depth" class="slider-label">Depth (meters):</label>
                     <input type="number" id="depthInput" value="20" min="0" max="100" class="number-input">

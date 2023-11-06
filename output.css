@@ -582,6 +582,11 @@ video {
   margin-bottom: 2rem;
 }
 
+.my-6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .mt-2 {
   margin-top: 0.5rem;
 }
@@ -658,6 +663,11 @@ video {
   line-height: 2.5rem;
 }
 
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
 .font-bold {
   font-weight: 700;
 }
@@ -710,7 +720,7 @@ h3 {
 
 .canvas-container {
   position: relative;
-  width: 100%;
+  width: 120%;
   /* Responsive width */
   height: auto;
   /* Height can be auto if the canvas has an intrinsic height */
@@ -728,13 +738,38 @@ h3 {
   /* More styles */
 }
 
+.hidden {
+  display: none !important;
+}
+
+/* Position the upload form absolutely within the canvas container */
+
 .upload-form {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   /* Ensure this form is inside .canvas-container in your HTML */
-  /* Other styles */
+  /* Other styles... */
+}
+
+/* Ensure the icon is styled correctly to fit within the form */
+
+.upload-icon {
+  width: 20%;
+  /* Adjust the width as needed */
+  position: absolute;
+  /* Use absolute positioning */
+  top: 50%;
+  /* Center vertically */
+  left: 50%;
+  /* Center horizontally */
+  transform: translate(-50%, -160%);
+  /* Offset the icon by half its width and height */
+  display: block;
+  /* Use block display for applying margin auto */
+  margin: auto;
+  /* Auto margin for additional centering */
 }
 
 .file-input {
@@ -773,23 +808,6 @@ h3 {
     font-size: 14px;
     /* Smaller font size on smaller screens */
   }
-}
-
-.upload-icon {
-  width: 20%;
-  /* Adjust the width as needed */
-  position: absolute;
-  /* Use absolute positioning */
-  top: 50%;
-  /* Center vertically */
-  left: 50%;
-  /* Center horizontally */
-  transform: translate(-50%, -160%);
-  /* Offset the icon by half its width and height */
-  display: block;
-  /* Use block display for applying margin auto */
-  margin: auto;
-  /* Auto margin for additional centering */
 }
 
 .browse-button {
@@ -995,12 +1013,6 @@ input[type="range"] {
   }
 
   .upload-icon {
-    width: 2rem;
-    /* Smaller icon on small screens */
-    top: 50%;
-    /* Start with the mobile view position */
-    left: 50%;
-    transform: translate(-50%, -200%);
   }
 
   .settings-container {
@@ -1017,12 +1029,6 @@ input[type="range"] {
   }
 
   .upload-icon {
-    width: 2rem;
-    /* Smaller icon on small screens */
-    top: 50%;
-    /* Start with the mobile view position */
-    left: 50%;
-    transform: translate(-50%, -200%);
   }
 
   h3 {

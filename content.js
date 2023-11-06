@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const thresholdRatioValue = document.getElementById("thresholdRatioValue");
     const blueMagicValueSlider = document.getElementById("blueMagicValue");
     const blueMagicValueValue = document.getElementById("blueMagicValueValue");
-
+    updateSettingsVisibility();
     // For RGB sliders
     const redSlider = document.getElementById("redInput");
     const redValue = document.getElementById("redValue");
@@ -67,6 +67,16 @@ document.addEventListener("DOMContentLoaded", function() {
         applySettings();
     });
 });
+
+function updateSettingsVisibility() {
+    const settingsContainer = document.querySelector('.settings-container');
+  
+    if (currentMediaType != 'none') {
+      settingsContainer.classList.remove('hidden');
+    } else {
+      settingsContainer.classList.add('hidden');
+    }
+  }
 
 //---------IMAGE FILTER LOGIC----------//
 // This will work because adjstRed is defined in this scope
@@ -670,6 +680,7 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
       } else {
         // Files selected, proceed with the upload
         uploadFile(event.target.files[0]);
+        updateSettingsVisibility();
       }
 
     colorCorrectEnable = false;
@@ -848,19 +859,19 @@ fileInput.addEventListener('change', (e) => {
         blueMultiplier = this.value / 255;
         applySettings();
     });
-    document.getElementById("resetBtn").addEventListener("click", function() {
-        // Reset all your variables and settings to default
-        redMultiplier = 1;
-        greenMultiplier = 1;
-        blueMultiplier = 1;
+    // document.getElementById("resetBtn").addEventListener("click", function() {
+    //     // Reset all your variables and settings to default
+    //     redMultiplier = 1;
+    //     greenMultiplier = 1;
+    //     blueMultiplier = 1;
     
-        // Currently showing the original, switch to the filtered
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const pixels = imageData.data;
-        const colorFilterMatrix = getColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
-        applyColorMatrixToPixels(pixels, colorFilterMatrix);
-        ctx.putImageData(imageData, 0, 0);
-      });
+    //     // Currently showing the original, switch to the filtered
+    //     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    //     const pixels = imageData.data;
+    //     const colorFilterMatrix = getColorFilterMatrix(pixels, canvas.width, canvas.height, depth);
+    //     applyColorMatrixToPixels(pixels, colorFilterMatrix);
+    //     ctx.putImageData(imageData, 0, 0);
+    //   });
     
     document.getElementById("downloadBtn").addEventListener("click", function() {
         const canvas = document.getElementById('canvas');
