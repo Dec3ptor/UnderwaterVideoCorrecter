@@ -941,8 +941,8 @@ function processImageFile(fileOrBlob, type) {
 }
 
 function toggleOriginalImage() {
-    const file = fileInput.files[0];
-    const type = file.type;
+   // const file = fileInput.files[0];
+    //const type = file.type;
 
     if (currentMediaType === 'image') {
         const canvas = document.getElementById('canvas');
