@@ -15,33 +15,68 @@ h3 {
     @apply text-lg font-semibold text-gray-800 mb-4;
 }
 
-/* Positioning the upload form over the canvas */
-.upload-form {
+.canvas-container {
+    position: relative;
+    width: 100%; /* Responsive width */
+    height: auto; /* Height can be auto if the canvas has an intrinsic height */
+    /* More styles if necessary */
+  }
+  
+  #canvas {
+    width: 100%; /* Make canvas responsive */
+    /* Set a max-width if necessary */
+    height: auto; /* Maintain aspect ratio */
+    /* More styles */
+  }
+  
+  .upload-form {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    text-align: center;
-}
+    /* Ensure this form is inside .canvas-container in your HTML */
+    /* Other styles */
+  }
+  
+  
 
 .file-input {
     display: none; /* Hide the actual file input */
 }
 
-.upload-label {
-    display: inline-block;
-    cursor: pointer;
-    /* Add styles for your label that looks like a button */
+/* Container holding the canvas and the form */
+.canvas-container {
+    display: flex; /* Use flexbox for easier centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 300px; /* Or as per your requirement */
+  }
+  
+  /* Responsive fileInput label */
+  .fileInput {
+    max-width: 90%; /* Prevent it from getting too wide */
+    margin: auto; /* Centering if using block display */
+    text-align: center; /* Center text inside */
+  }
+  
+  @media (max-width: 640px) {
+    .upload-label {
+      padding: 8px 16px; /* Smaller padding on smaller screens */
+      font-size: 14px; /* Smaller font size on smaller screens */
+    }
+  }
+  
+
+  .upload-icon {
+    width: 20%; /* Adjust the width as needed */
+    position: absolute; /* Use absolute positioning */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -160%); /* Offset the icon by half its width and height */
+    display: block; /* Use block display for applying margin auto */
+    margin: auto; /* Auto margin for additional centering */
 }
 
-.upload-icon {
-    width: 20%;
-    top: 50%;
-    left: 50%;
-    transform: translate(200%, -50%);
-    text-align: center;
-
-}
 
 .browse-button {
     background-color: #007bff; /* Your blue color */
@@ -117,34 +152,55 @@ input[type="range"] {
 }
 
 /* Responsive design */
+/* Base mobile styles */
+.upload-form {
+    @apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center;
+}
+
+/* Smaller devices (phones) */
+@media (max-width: 640px) {
+    .upload-label {
+        @apply text-sm; /* Smaller text on small screens */
+    }
+    .upload-icon {
+        @apply w-8; /* Smaller icon on small screens */
+        top: 50%; /* Start with the mobile view position */
+        left: 50%;
+        transform: translate(-50%, -200%);
+    }
+}
+
+/* Tablets */
 @media (min-width: 640px) {
-    body {
-        @apply p-6;
-    }
-
-    #canvas,
-    #video,
-    #filteredVideo {
-        @apply max-w-4xl;
-    }
-
-    .settings-container {
-        @apply flex justify-between items-center;
+    .upload-form {
+        @apply px-4; /* Adjust padding on tablet screens */
     }
 }
 
+/* Small laptops/large tablets */
 @media (min-width: 768px) {
-    h1 {
-        @apply text-5xl;
-    }
-
-    h3 {
-        @apply text-xl;
+    .upload-form {
+        @apply px-8; /* Adjust padding for larger tablets/small laptops */
     }
 }
 
+/* Laptops/Desktops */
 @media (min-width: 1024px) {
-    .settings-container {
-        @apply p-6;
+    .upload-form {
+        @apply px-12; /* Larger padding for laptops and desktops */
+    }
+    .upload-label {
+        @apply text-lg; /* Larger text for larger screens */
+    }
+    .upload-icon {
+        @apply w-16; /* Larger icon for larger screens */
     }
 }
+
+/* Large screens */
+@media (min-width: 1280px) {
+    .upload-form {
+        @apply px-16; /* Even larger padding for larger screens */
+    }
+}
+

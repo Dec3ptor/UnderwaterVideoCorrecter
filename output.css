@@ -704,14 +704,30 @@ h3 {
   color: rgb(31 41 55 / var(--tw-text-opacity));
 }
 
-/* Positioning the upload form over the canvas */
+.canvas-container {
+  position: relative;
+  width: 100%;
+  /* Responsive width */
+  height: auto;
+  /* Height can be auto if the canvas has an intrinsic height */
+  /* More styles if necessary */
+}
+
+#canvas {
+  width: 100%;
+  /* Make canvas responsive */
+  /* Set a max-width if necessary */
+  /*height: auto; /* Maintain aspect ratio */
+  /* More styles */
+}
 
 .upload-form {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  text-align: center;
+  /* Ensure this form is inside .canvas-container in your HTML */
+  /* Other styles */
 }
 
 .file-input {
@@ -719,18 +735,54 @@ h3 {
   /* Hide the actual file input */
 }
 
-.upload-label {
-  display: inline-block;
-  cursor: pointer;
-  /* Add styles for your label that looks like a button */
+/* Container holding the canvas and the form */
+
+.canvas-container {
+  display: flex;
+  /* Use flexbox for easier centering */
+  justify-content: center;
+  /* Center horizontally */
+  align-items: center;
+  /* Center vertically */
+  height: 300px;
+  /* Or as per your requirement */
+}
+
+/* Responsive fileInput label */
+
+.fileInput {
+  max-width: 90%;
+  /* Prevent it from getting too wide */
+  margin: auto;
+  /* Centering if using block display */
+  text-align: center;
+  /* Center text inside */
+}
+
+@media (max-width: 640px) {
+  .upload-label {
+    padding: 8px 16px;
+    /* Smaller padding on smaller screens */
+    font-size: 14px;
+    /* Smaller font size on smaller screens */
+  }
 }
 
 .upload-icon {
   width: 20%;
+  /* Adjust the width as needed */
+  position: absolute;
+  /* Use absolute positioning */
   top: 50%;
+  /* Center vertically */
   left: 50%;
-  transform: translate(200%, -50%);
-  text-align: center;
+  /* Center horizontally */
+  transform: translate(-50%, -160%);
+  /* Offset the icon by half its width and height */
+  display: block;
+  /* Use block display for applying margin auto */
+  margin: auto;
+  /* Auto margin for additional centering */
 }
 
 .browse-button {
@@ -900,39 +952,90 @@ input[type="range"] {
 
 /* Responsive design */
 
-@media (min-width: 640px) {
-  body {
-    padding: 1.5rem;
+/* Base mobile styles */
+
+.upload-form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  --tw-translate-x: -50%;
+  --tw-translate-y: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  text-align: center;
+}
+
+/* Smaller devices (phones) */
+
+@media (max-width: 640px) {
+  .canvas {
+    height: 700;
+    /* Maintain aspect ratio */
   }
 
-  #canvas,
-    #video,
-    #filteredVideo {
-    max-width: 56rem;
+  .upload-label {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    /* Smaller text on small screens */
   }
 
-  .settings-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .upload-icon {
+    width: 2rem;
+    /* Smaller icon on small screens */
+    top: 50%;
+    /* Start with the mobile view position */
+    left: 50%;
+    transform: translate(-50%, -200%);
   }
 }
+
+/* Tablets */
+
+@media (min-width: 640px) {
+  .upload-form {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    /* Adjust padding on tablet screens */
+  }
+}
+
+/* Small laptops/large tablets */
 
 @media (min-width: 768px) {
-  h1 {
-    font-size: 3rem;
-    line-height: 1;
-  }
-
-  h3 {
-    font-size: 1.25rem;
-    line-height: 1.75rem;
+  .upload-form {
+    padding-left: 2rem;
+    padding-right: 2rem;
+    /* Adjust padding for larger tablets/small laptops */
   }
 }
 
+/* Laptops/Desktops */
+
 @media (min-width: 1024px) {
-  .settings-container {
-    padding: 1.5rem;
+  .upload-form {
+    padding-left: 3rem;
+    padding-right: 3rem;
+    /* Larger padding for laptops and desktops */
+  }
+
+  .upload-label {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    /* Larger text for larger screens */
+  }
+
+  .upload-icon {
+    width: 4rem;
+    /* Larger icon for larger screens */
+  }
+}
+
+/* Large screens */
+
+@media (min-width: 1280px) {
+  .upload-form {
+    padding-left: 4rem;
+    padding-right: 4rem;
+    /* Even larger padding for larger screens */
   }
 }
 
@@ -940,3 +1043,4 @@ input[type="range"] {
   --tw-bg-opacity: 1;
   background-color: rgb(29 78 216 / var(--tw-bg-opacity));
 }
+
