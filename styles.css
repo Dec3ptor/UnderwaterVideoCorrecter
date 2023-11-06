@@ -25,7 +25,7 @@ h3 {
   #canvas {
     width: 100%; /* Make canvas responsive */
     /* Set a max-width if necessary */
-    height: auto; /* Maintain aspect ratio */
+    height: 70%; /* Height can be auto if the canvas has an intrinsic height */
     /* More styles */
   }
   
@@ -54,6 +54,7 @@ h3 {
   
   /* Responsive fileInput label */
   .fileInput {
+    
     max-width: 90%; /* Prevent it from getting too wide */
     margin: auto; /* Centering if using block display */
     text-align: center; /* Center text inside */
@@ -159,6 +160,9 @@ input[type="range"] {
 
 /* Smaller devices (phones) */
 @media (max-width: 640px) {
+    .canvas {
+        
+    }
     .upload-label {
         @apply text-sm; /* Smaller text on small screens */
     }
